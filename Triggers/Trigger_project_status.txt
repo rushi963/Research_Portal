@@ -1,0 +1,20 @@
+CREATE TRIGGER check_project
+BEFORE INSERT OR UPDATE ON project
+FOR EACH ROW
+EXECUTE PROCEDURE check_project_status();
+
+
+CREATE OR REPLACE FUNCTION check_project_status() RETURNS trigger AS
+$BODY$
+DECLARE
+	
+BEGIN
+	IF NEW.status = 'Completed' OR NEW.status = 'Upcoming' OR NEW.status = 'Stalled' OR NEW.status = 'Ongoing'	
+	THEN
+		RETURN NEW;	
+	ELSE
+		RAISE EXCEPTION 'invalid status. Must be one of Completed,Upcoming,Stalled,Ongoing';
+	END IF;	
+END;
+$BODY$
+LANGUAGE plpgsql;

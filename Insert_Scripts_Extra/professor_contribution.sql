@@ -1,0 +1,12 @@
+insert into professor_contribution(prof_id,doi) values ('68-1979109','893443039-7' );
+insert into professor_contribution(prof_id,doi) values ('68-1979109','381891779-5' );
+insert into professor_contribution(prof_id,doi) values ('30-4510804','468498267-X' );
+insert into professor_contribution(prof_id,doi) values ('30-4510804','173560368-6' );
+insert into professor_contribution(prof_id,doi) values ('25-9951410','214038317-6' );
+insert into professor_contribution(prof_id,doi) values ('25-9951410','074184836-8' );
+insert into professor_contribution(prof_id,doi) values ('25-9951410','173560368-6' );
+insert into professor_contribution(prof_id,doi) values ('85-5180507','074184836-8' );
+insert into professor_contribution(prof_id,doi) values ('85-5180507','893443039-7' );
+insert into professor_contribution(prof_id,doi) values ('85-5180507','214038317-6' );
+insert into professor_contribution(prof_id,doi) values ('68-1979109','173560368-6' );
+insert into professor_contribution(prof_id,doi) values ('61-4998878','893443039-7' );

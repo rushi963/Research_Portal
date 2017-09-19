@@ -1,0 +1,26 @@
+set SEARCH_PATH to researchportal;
+
+CREATE OR REPLACE FUNCTION conference_check() RETURNS trigger AS $city_scope_check$
+    DECLARE
+		scope character varying(15);
+    BEGIN
+        --
+        -- Create a row in emp_audit to reflect the operation performed on emp,
+        -- make use of the special variable TG_OP to work out the operation.
+        --
+        IF (TG_OP = 'INSERT') THEN
+				NEW.city = INITCAP(NEW.city);
+				NEW.scope = INITCAP(NEW.scope);
+				IF NEW.scope = 'International' OR NEW.scope = 'National' THEN
+					RETURN NEW;
+				END IF;
+        END IF;
+
+        raise EXCEPTION 'conference scope must be national or international';
+        RETURN NULL;
+    END;
+$city_scope_check$ LANGUAGE plpgsql;
+
+CREATE TRIGGER city_scope_check
+BEFORE INSERT OR UPDATE ON conference
+	FOR EACH ROW EXECUTE PROCEDURE conference_check();

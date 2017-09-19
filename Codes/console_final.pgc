@@ -1,0 +1,198 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+
+EXEC SQL include sqlda.h;
+EXEC SQL WHENEVER SQLERROR CALL print_sqlca();
+
+sqlda_t *sqlda1; /* an output descriptor */
+sqlda_t *sqlda2; /* an input descriptor  */
+
+void print_sqlca();
+int main()
+{
+    EXEC SQL BEGIN DECLARE SECTION;
+    const char *target = "201401103@10.100.71.21";
+    const char *user = "201401103";
+    const char *password = "alskdj123";
+    int intval;
+    float floatval;
+    int c;
+    unsigned long long int longlongval;
+
+
+//  const char *stmt = "SELECT batch FROM student WHERE sid='1'"; //side query
+//  const char *stmtinsert = "INSERT INTO student VALUES(?,?,?,?,?);";
+
+
+    char query[1024]= "";
+    EXEC SQL END DECLARE SECTION;
+
+    EXEC SQL CONNECT TO :target USER :user USING :password;
+    EXEC SQL set search_path to researchportal;
+
+    int mode;
+    
+    char *scanmode = (char *) malloc(sizeof(char)); // 1 for insert
+      
+    while(true)
+    { 
+        printf("Select action\n0: Select\n1: Insert\n2: Delete\n3: Update\n Ctrl-c to quit\n");
+        gets(scanmode);
+
+        mode = atoi(scanmode);
+
+        if (mode==1)
+        {
+          
+            printf("enter query for insert\n");
+            gets(query);
+            
+            EXEC SQL PREPARE mystmt FROM :query;
+            EXEC SQL EXECUTE mystmt;       
+
+            EXEC SQL COMMIT;
+        }
+        
+        else if (mode==2)
+        {
+             printf("enter query for delete\n");
+             gets(query);
+            
+             EXEC SQL PREPARE mystmt FROM :query;
+             EXEC SQL EXECUTE mystmt; 
+
+
+             EXEC SQL COMMIT;
+        }    
+
+        else if (mode==3)
+        {  
+             printf("enter query for update\n");
+             gets(query);
+            
+             EXEC SQL PREPARE mystmt FROM :query;
+             EXEC SQL EXECUTE mystmt; 
+
+
+             EXEC SQL COMMIT;
+        }
+
+        else
+        {    
+            printf("enter query for select\n");
+
+            gets(query);
+
+            EXEC SQL PREPARE stmt1 FROM :query;
+            EXEC SQL DECLARE cur1 CURSOR FOR stmt1;
+
+            EXEC SQL OPEN cur1; // USING DESCRIPTOR sqlda2; // cursor for result of query
+
+            while (true)
+            {
+                sqlda_t *cur_sqlda;
+
+                /* Assign descriptor to the cursor  */
+                EXEC SQL FETCH NEXT FROM cur1 INTO DESCRIPTOR sqlda1;
+
+                for (cur_sqlda = sqlda1 ; cur_sqlda != NULL ; cur_sqlda = cur_sqlda->desc_next)
+                {
+                    int i;
+                    char name_buf[1024];
+                    char var_buf[1024];
+
+                    /* Print every column in a row. */
+                    for (i=0 ; i<(cur_sqlda->sqld); i++)
+                    {
+                        sqlvar_t v = cur_sqlda->sqlvar[i];
+                        char *sqldata = v.sqldata;
+                        short sqllen  = v.sqllen;
+
+                        strncpy(name_buf, v.sqlname.data, v.sqlname.length);
+                        name_buf[v.sqlname.length] = '\0';
+
+                        switch (v.sqltype)
+                        {
+                            case ECPGt_char:
+                                memset(&var_buf, 0, sizeof(var_buf));
+                                memcpy(&var_buf, sqldata, (sizeof(var_buf)<=sqllen ? sizeof(var_buf)-1 : sqllen) );
+                                printf("%s = %s \n", name_buf, var_buf);
+                                break;
+
+                            case ECPGt_int: // integer 
+                                memcpy(&intval, sqldata, sqllen);
+                                snprintf(var_buf, sizeof(var_buf), "%d", intval);
+                                printf("%s = %s \n", name_buf, var_buf);
+                                break;                
+                            
+                            case ECPGt_numeric:
+                                printf( "%s = %s\n", name_buf, (PGTYPESnumeric_to_asc(sqldata,2)) );
+                                break;
+                            
+                            case 18:
+                                printf("%s = %s\n", name_buf, PGTYPESdate_to_asc(*v.sqldata));
+                                break;    
+                            
+                            default:
+                            {
+                                int i;
+                                                     
+                                memset(var_buf, 0, sizeof(var_buf));
+                                for (i = 0; i < sqllen; i++)
+                                {
+                                    char tmpbuf[16];
+                                    
+                                    snprintf(tmpbuf, sizeof(tmpbuf), "%c", (unsigned char) sqldata[i]); // "%02x" -> "%c"
+                                    strncat(var_buf, tmpbuf, sizeof(var_buf));
+                                    
+                                    printf("%s = %s \n", name_buf, var_buf);
+                                }
+                            }
+                        }
+
+                      if (sqlca.sqlcode==100)
+                        break;            
+                    }
+                     
+                    printf("\n");
+                    
+                     printf("---------------------------------------------------------------------------------------\n");
+                      if (sqlca.sqlcode==100)
+                        break;
+                }
+                
+                   if (sqlca.sqlcode==100)
+                        break;  
+            }
+
+            EXEC SQL CLOSE cur1;
+            EXEC SQL COMMIT;
+
+            printf("\n");
+            printf("\n");
+            printf("\n");
+            printf("************************************************************************************************\n");
+        }
+    }
+    EXEC SQL DISCONNECT ALL;
+    return 0;
+}
+
+void
+print_sqlca()
+{
+    fprintf(stderr, "==== sqlca ====\n");
+    fprintf(stderr, "sqlcode: %ld\n", sqlca.sqlcode);
+    fprintf(stderr, "sqlerrm.sqlerrml: %d\n", sqlca.sqlerrm.sqlerrml);
+    fprintf(stderr, "sqlerrm.sqlerrmc: %s\n", sqlca.sqlerrm.sqlerrmc);
+    fprintf(stderr, "sqlerrd: %ld %ld %ld %ld %ld %ld\n", sqlca.sqlerrd[0],sqlca.sqlerrd[1],sqlca.sqlerrd[2],
+                                                          sqlca.sqlerrd[3],sqlca.sqlerrd[4],sqlca.sqlerrd[5]);
+    fprintf(stderr, "sqlwarn: %d %d %d %d %d %d %d %d\n", sqlca.sqlwarn[0], sqlca.sqlwarn[1], sqlca.sqlwarn[2],
+                                                          sqlca.sqlwarn[3], sqlca.sqlwarn[4], sqlca.sqlwarn[5],
+                                                          sqlca.sqlwarn[6], sqlca.sqlwarn[7]);
+    fprintf(stderr, "sqlstate: %5s\n", sqlca.sqlstate);
+    fprintf(stderr, "===============\n");
+}

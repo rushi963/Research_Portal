@@ -1,0 +1,10 @@
+INSERT INTO research_lab VALUES ('Advanced Computing and Simulations', 110, 'Lab building', '5              ', '69-7838304     ');
+INSERT INTO research_lab VALUES ('Networked Systems Lab', 115, 'Lab building', '9              ', '05-4844263     ');
+INSERT INTO research_lab VALUES ('Systems Software Engineering Lab', 207, 'Lab building', '12             ', '54-7938725     ');
+INSERT INTO research_lab VALUES ('Embedded Systems Lab', 211, 'Lab building', '13             ', '21-0140456     ');
+INSERT INTO research_lab VALUES ('Computer Secuity Lab', 302, 'Lab building', '19             ', '54-7938725     ');
+INSERT INTO research_lab VALUES ('Parallel Computing Group', 111, 'CEP', '22             ', '85-5180507     ');
+INSERT INTO research_lab VALUES ('Information Retrieval Lab', 10, 'CEP', '25             ', '79-0566677     ');
+INSERT INTO research_lab VALUES ('Computer Graphics Lab', 103, 'CEP', '26             ', '60-1677694     ');
+INSERT INTO research_lab VALUES ('Big Data Analysis Lab', 205, 'CEP', '27             ', '98-9799272     ');
+INSERT INTO research_lab VALUES ('ICT for Agriculture', 310, 'CEP', '31             ', '19-1624032     ');

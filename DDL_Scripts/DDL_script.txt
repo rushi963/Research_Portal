@@ -1,0 +1,187 @@
+--set search_path to researchportal
+
+--set search_path to researchportal
+
+CREATE TABLE researchportal.student
+(
+  sid character(15) NOT NULL,
+  sname character varying(40),
+  prog_name character varying(20),
+  batch integer,
+  cpi numeric(4,2),
+  CONSTRAINT student_pkey PRIMARY KEY (sid)
+);
+
+CREATE TABLE researchportal.studentinterests
+(
+  sid character(15) NOT NULL,
+  interest character varying(25) NOT NULL,
+  CONSTRAINT studentinterests_pkey PRIMARY KEY (sid, interest),
+  CONSTRAINT studentinterests_sid_fkey FOREIGN KEY (sid)
+      REFERENCES researchportal.student (sid) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE researchportal.studentskills
+(
+  sid character(15) NOT NULL,
+  skills character varying(25) NOT NULL,
+  CONSTRAINT studentskills_pkey PRIMARY KEY (sid, skills),
+  CONSTRAINT studentskills_sid_fkey FOREIGN KEY (sid)
+      REFERENCES researchportal.student (sid) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE researchportal.department
+(
+  dept_id integer NOT NULL,
+  dept_name character varying(25),
+  CONSTRAINT department_pkey PRIMARY KEY (dept_id)
+);
+
+
+CREATE TABLE researchportal.professor
+(
+  prof_name character varying(40),
+  designation character varying(20),
+  dept_id integer,
+  h_index integer,
+  i_index integer,
+  prof_id character(15) NOT NULL,
+  CONSTRAINT professor_pkey PRIMARY KEY (prof_id),
+  CONSTRAINT professor_dept_id_fkey FOREIGN KEY (dept_id)
+      REFERENCES researchportal.department (dept_id) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE researchportal.professorinterests
+(
+  interest character varying(25) NOT NULL,
+  prof_id character(15) NOT NULL,
+  CONSTRAINT professorinterests_pkey PRIMARY KEY (prof_id, interest),
+  CONSTRAINT professorinterests_prof_id_fkey FOREIGN KEY (prof_id)
+      REFERENCES researchportal.professor (prof_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE researchportal.research_lab
+(
+  name character varying(50),
+  room_no integer NOT NULL,
+  building_name character varying(25) NOT NULL,
+  phd_supervisor character(15),
+  headed_by character(15),
+  CONSTRAINT research_lab_pkey PRIMARY KEY (room_no, building_name),
+  CONSTRAINT research_lab_headed_by_fkey FOREIGN KEY (headed_by)
+      REFERENCES researchportal.professor (prof_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT research_lab_phd_supervisor_fkey FOREIGN KEY (phd_supervisor)
+      REFERENCES researchportal.student (sid) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE researchportal.project
+(
+  proj_id integer NOT NULL,
+  proj_name character varying(25),
+  proj_domain character varying(25),
+  inception_date date,
+  conclusion_date date,
+  status character varying(20),
+  CONSTRAINT project_pkey PRIMARY KEY (proj_id)
+);
+
+CREATE TABLE researchportal.student_works_on
+(
+  proj_id integer NOT NULL,
+  sid character(15) NOT NULL,
+  start_date date,
+  end_date date,
+  guided_by character(15),
+  CONSTRAINT student_works_on_pkey PRIMARY KEY (sid, proj_id),
+  CONSTRAINT student_works_on_guided_by_fkey FOREIGN KEY (guided_by)
+      REFERENCES researchportal.professor (prof_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT student_works_on_proj_id_fkey FOREIGN KEY (proj_id)
+      REFERENCES researchportal.project (proj_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT student_works_on_sid_fkey FOREIGN KEY (sid)
+      REFERENCES researchportal.student (sid) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE researchportal.professor_works_on
+(
+  proj_id integer NOT NULL,
+  start_date date,
+  end_date date,
+  prof_id character(15) NOT NULL,
+  CONSTRAINT professor_works_on_pkey PRIMARY KEY (prof_id, proj_id),
+  CONSTRAINT professor_works_on_prof_id_fkey FOREIGN KEY (prof_id)
+      REFERENCES researchportal.professor (prof_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT professor_works_on_proj_id_fkey FOREIGN KEY (proj_id)
+      REFERENCES researchportal.project (proj_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+
+CREATE TABLE researchportal.conference
+(
+  conference_name character varying(200) NOT NULL,
+  scope character varying(15),
+  city character varying(20),
+  year integer,
+  CONSTRAINT conference_pkey PRIMARY KEY (conference_name)
+);
+
+CREATE TABLE researchportal.publication
+(
+  doi character(15) NOT NULL,
+  publication_name character varying(50),
+  publication_date date,
+  field character varying(25),
+  publication_type character varying(15),
+  conference_name character varying(200),
+  impact_factor numeric(5,3),
+  CONSTRAINT publication_pkey PRIMARY KEY (doi),
+  CONSTRAINT publication_conference_name_fkey FOREIGN KEY (conference_name)
+      REFERENCES researchportal.conference (conference_name) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL
+)
+
+CREATE TABLE researchportal.research_contribution
+(
+  doi character(15) NOT NULL,
+  author_id character(15) NOT NULL,
+  CONSTRAINT research_contribution_pkey PRIMARY KEY (author_id, doi),
+  CONSTRAINT research_contribution_doi_fkey FOREIGN KEY (doi)
+      REFERENCES researchportal.publication (doi) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE researchportal.student_contribution
+(
+  doi character(15) NOT NULL,
+  sid character(15) NOT NULL,
+  CONSTRAINT student_contribution_pkey PRIMARY KEY (doi, sid),
+  CONSTRAINT student_contribution_doi_fkey FOREIGN KEY (doi)
+      REFERENCES researchportal.publication (doi) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT student_contribution_sid_fkey FOREIGN KEY (sid)
+      REFERENCES researchportal.student (sid) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+CREATE TABLE researchportal.professor_contribution
+(
+  doi character(15) NOT NULL,
+  prof_id character(15) NOT NULL,
+  CONSTRAINT professor_contribution_pkey PRIMARY KEY (doi, prof_id),
+  CONSTRAINT professor_contribution_doi_fkey FOREIGN KEY (doi)
+      REFERENCES researchportal.publication (doi) MATCH SIMPLE
+      ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT professor_contribution_prof_id_fkey FOREIGN KEY (prof_id)
+      REFERENCES researchportal.professor (prof_id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);

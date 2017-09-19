@@ -1,0 +1,40 @@
+--set SEARCH_PATH to researchportal;
+
+CREATE OR REPLACE FUNCTION author_id_check() RETURNS trigger AS $rsch_id_check$
+    DECLARE
+		studid character(15);
+		profid character(15);
+		auth_id integer;
+    BEGIN
+        --
+        -- Create a row in emp_audit to reflect the operation performed on emp,
+        -- make use of the special variable TG_OP to work out the operation.
+        --
+        IF (TG_OP = 'INSERT') THEN
+
+			FOR profid IN SELECT prof_id FROM researchportal.professor
+			LOOP
+				IF NEW.author_id = profid THEN
+					RETURN NEW;
+				END IF;
+			END LOOP;
+
+			--auth_id := to_number(NEW.author_id, '999999');
+
+			FOR studid IN SELECT sid FROM researchportal.student
+			LOOP
+				IF NEW.author_id = studid THEN
+					RETURN NEW;
+				END IF;
+			END LOOP;
+	     
+        END IF;
+
+        raise EXCEPTION 'author_id does not exist';
+        RETURN NULL;
+    END;
+$rsch_id_check$ LANGUAGE plpgsql;
+
+CREATE TRIGGER rsch_id_check
+BEFORE INSERT OR UPDATE ON research_contribution
+	FOR EACH STATEMENT EXECUTE PROCEDURE author_id_check();

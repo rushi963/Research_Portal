@@ -1,0 +1,18 @@
+CREATE TYPE pr_name AS (professor_name character varying (25)) ;
+
+CREATE OR REPLACE FUNCTION interested_professors(p_interest character varying (25)) RETURNS SETOF pr_name AS 
+$BODY$
+DECLARE
+	r pr_name;
+BEGIN
+	FOR r IN SELECT prof_name FROM (SELECT * FROM professorinterests WHERE interest=p_interest) AS i_profs NATURAL JOIN professor 
+	LOOP
+		RETURN NEXT r;	
+	END LOOP;
+	RETURN;
+END
+$BODY$
+LANGUAGE plpgsql;
+
+set search_path to researchportal;
+SELECT * FROM interested_professors('HPC')

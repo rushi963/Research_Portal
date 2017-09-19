@@ -1,0 +1,11 @@
+Trigger 1 -
+update researchportal.research_contribution set author_id = '105' where doi = '214038317-6'
+insert into researchportal.research_contribution (doi, author_id) values ('893443039-7', '105');
+
+Trigger 4 -
+INSERT INTO researchportal.conference VALUES ( 'National Conference on Industrial Engineering and Technology Management', 'Local', 'Mumbai', 2016);
+update researchportal.conference set scope = 'Local' where city = 'Mumbai'
+
+Trigger 5 -
+insert into researchportal.project (proj_id, proj_name, proj_domain, inception_date, conclusion_date, status) values (1, 'Jonah', 'Economics', '2006-06-23', '2009-12-28', 'finished');
+update researchportal.project set status = 'finished' where proj_id = 1

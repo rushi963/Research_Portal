@@ -1,0 +1,11 @@
+insert into researchportal.student_contribution (doi, sid) values ('893443039-7', 3);
+insert into researchportal.student_contribution (doi, sid) values ('893443039-7', 13);
+insert into researchportal.student_contribution (doi, sid) values ('893443039-7', 35);
+insert into researchportal.student_contribution (doi, sid) values ('118214469-1', 13);
+insert into researchportal.student_contribution (doi, sid) values ('493439216-5', 13);
+insert into researchportal.student_contribution (doi, sid) values ('087107322-6', 17);
+insert into researchportal.student_contribution (doi, sid) values ('468498267-X', 17);
+insert into researchportal.student_contribution (doi, sid) values ('381891779-5', 17);
+insert into researchportal.student_contribution (doi, sid) values ('659319673-8', 54);
+insert into researchportal.student_contribution (doi, sid) values ('251998646-8', 82);
+insert into researchportal.student_contribution (doi, sid) values ('251998646-8', 47);

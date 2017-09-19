@@ -1,0 +1,93 @@
+﻿Retrieval Queries - 
+
+
+Q)Retrieve all professors whose research interest is Algorithms or HPC.
+1)SELECT prof_name FROM (SELECT * from professorinterests WHERE interest = 'Algorithms' or interest = 'HPC') AS filteredprof NATURAL JOIN professor
+
+
+Q)Retrieve all phd students who are working on project title 'Mad Hatter'.
+2)SELECT sid, sname FROM student_works_on NATURAL JOIN (SELECT * FROM student WHERE prog_name = 'Phd') as r NATURAL JOIN project where proj_name = 'Mad Hatter';
+
+
+Q)Retrieve all mtech students who worked with professor Anna Webb in 2012.
+3)SELECT DISTINCT(sid), sname FROM student NATURAL JOIN student_works_on NATURAL JOIN professor WHERE prog_name = 'MTech' AND prof_name = 'Anna Webb' AND start_date <= '2012-12-31' AND end_date >= '2012-01-01';
+
+
+Q)Retrieve all students who have worked with at least three professors.
+4)SELECT sid FROM (SELECT sid FROM student NATURAL JOIN student_works_on GROUP BY sid HAVING count(guided_by) >= 2) as r
+
+
+Q)Retrieve all professors who have students with cpi>8 and cpi<9 working on less than 3 projects.
+5)SELECT sid, sname FROM (SELECT sid FROM student NATURAL JOIN student_works_on WHERE cpi>8 and cpi<9 GROUP BY sid HAVING count(proj_id) < 3) as r NATURAL JOIN student;  
+
+
+Q)Retrieve all professors who have not worked on any project in 2014.
+6)SELECT prof_id, prof_name FROM Professor WHERE prof_id NOT IN (SELECT prof_id FROM professor_works_on WHERE start_date<='2014-12-31' and end_date>='2014-01-01')
+
+
+Q)Retrieve names of guiding phd students having skill of ‘Linux Tools’ working in any of the      research labs.
+7)SELECT sid, sname FROM research_lab as rl JOIN (SELECT * FROM (Student NATURAL JOIN studentskills) WHERE skills = 'Linux Tools') AS a ON rl.phd_supervisor = a.sid
+
+
+Q)Give number of projects on which any professor of a department was working for each department on '2010-01-01'
+8)SELECT dept_id, count(prof_id) FROM (Professor NATURAL JOIN professor_works_on) WHERE start_date<'2010-01-01' AND end_date>'2010-01-01' GROUP BY dept_id        
+
+
+
+
+
+
+
+
+Q)Find skills of each student who has worked on more than 1 project
+9)SELECT skills FROM (SELECT sid, count(proj_id) FROM student NATURAL JOIN student_works_on GROUP BY sid HAVING count(proj_id)>1) AS s NATURAL JOIN studentskills
+
+
+Q) List all conferences which had more than 1 publication in field of 'Embedded Hardware Design' till date.
+10)SELECT conference_name, count(publication_name) FROM publication WHERE field = 'Embedded Hardware Design' GROUP BY conference_name HAVING count(publication_name) > 1
+
+
+Q) Give list of students who have interest in ‘Machine Learning’ but dont have Python as skill
+11)SELECT sname FROM student NATURAL JOIN studentinterests
+WHERE interest = 'Machine Learning' AND sid NOT IN (SELECT sid FROM studentskills NATURAL JOIN student NATURAL JOIN studentinterests
+WHERE interest = 'Machine Learning' AND skills = 'Python')
+
+
+Q) Find the most important publication(publication having the maximum impact factor)
+12)SELECT * From publication WHERE(impact_factor = (SELECT MAX(impact_factor) FROM publication))
+
+
+Q) The college needs to award a young professor for his research contribution. The committee wants to know ‘Is there an assistant/associate professor having impact factor better than the most accomplished full professor’?
+13) Select * FROM professor WHERE (designation='associate professor' OR designation='assistant professor' AND h_index>=(Select MAX(h_index) FROM professor WHERE (designation='professor')))
+
+
+Q) Find out the dominant research area of the institute (Dominant research area is the area in which maximum projects are ongoing or have been completed. Stalled and upcoming projects are not counted.)
+14) SELECT proj_domain, COUNT(proj_domain) FROM project GROUP BY proj_domain
+HAVING COUNT (proj_domain) = (SELECT MAX(proj_count)
+FROM (SELECT count(proj_name) as proj_count FROM project WHERE status = 'Completed' OR status = 'Ongoing' GROUP BY proj_domain) as r);
+
+
+Q) Give name and id of student who has cpi less than 8 but has more than 1 publication.
+15) SELECT sid,sname,count(doi) FROM student AS s JOIN research_contribution AS rc ON s.sid=rc.author_id
+WHERE cpi < 8 GROUP BY sid,sname HAVING count(doi) >=2
+
+
+
+
+
+
+
+
+
+
+Q) Retrieve all professors who have published at least 2 papers since 2001.
+16) SELECT prof_name,count(prof_id) FROM (professor AS p JOIN research_contribution AS rc ON p.prof_id = rc.author_id NATURAL JOIN Publication) WHERE publication_date>'2001-01-01' GROUP BY prof_name
+HAVING count(prof_id) >= 2    
+
+
+
+
+
+
+Q)Retrieve all conference names which have a publication by Teresa Patterson in 2010.
+17)SELECT conference_name FROM Publication NATURAL JOIN research_contribution AS rc JOIN Professor AS p ON rc.author_id=p.prof_id WHERE prof_name = 'Teresa Patterson' and publication_date <='2010-12-31' and publication_date >='2010-1-1'

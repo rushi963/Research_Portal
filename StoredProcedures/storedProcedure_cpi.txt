@@ -1,0 +1,9 @@
+CREATE OR REPLACE FUNCTION whatsmycpi (name character varying(40)) RETURNS numeric(4,2) 
+AS $BODY$
+DECLARE
+	mycpi numeric(4,2);
+BEGIN
+	SELECT cpi INTO mycpi FROM student as s WHERE s.sname=name;
+	RETURN mycpi;		
+END
+$BODY$ LANGUAGE plpgsql;
